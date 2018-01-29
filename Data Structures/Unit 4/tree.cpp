@@ -1,0 +1,210 @@
+#include <iostream>
+#include <cstddef>
+
+using std::cout;
+using std::endl;
+
+class Node {
+    int value;
+public:
+    Node* left;       // left child
+    Node* right;      // right child
+    Node* p;          // parent
+    Node(int data) {
+        value = data;
+        left = NULL;
+        right = NULL;
+        p  = NULL;
+    }
+    ~Node() {
+    }
+    int d() {
+        return value;
+    }
+    void print() {
+        cout << "Node Value: " << value << endl;
+        if(p != NULL) {
+        	cout << "Parent Node Value: " << p->d() << endl;
+        }
+        if(left != NULL) {
+        	cout << "Left Child Node Value: " << left->d() << endl;
+        }
+        if(right != NULL) {
+        	cout << "Right Child Node Value: " << right->d() << endl;
+        }
+        cout << endl;
+    }
+};
+
+void insert(Node *insert_node, Node *tree_root) {
+	//Your code here
+	//Insert left if root value larger.
+	if(insert_node->d() < tree_root->d()) {
+		//Check if left child node exists.
+		if(tree_root->left == NULL) {
+			tree_root->left = insert_node;
+			insert_node->p = tree_root;
+		}
+		else {
+			insert(insert_node, tree_root->left);
+		}	
+	}
+	//Insert right if root value smaller or the same.
+	if(insert_node->d() >= tree_root->d()) {
+		//Check if right child node exists.
+		if(tree_root->right == NULL) {
+			tree_root->right = insert_node;
+			insert_node->p = tree_root;
+		}
+		else {
+			insert(insert_node, tree_root->right);
+		}
+	}
+}
+
+void delete_node(int value, Node *tree_root){
+	if(tree_root == NULL) {
+		cout << "Tree is empty" << endl;
+	}
+	if(value > tree_root->d()) {
+		delete_node(value, tree_root->right);
+	}
+	if(value < tree_root->d()) {
+		delete_node(value, tree_root->left);
+	}
+	if(value == tree_root->d()) {
+		//No child nodes.
+		if(tree_root->left == NULL && tree_root->right == NULL) {
+			delete tree_root;
+			cout << "Tree is now empty" << endl;
+		}
+		//One child node:
+		//Right child node.
+		if(tree_root->left == NULL && tree_root->right != NULL) {
+			tree_root->right->p = tree_root->p;
+			tree_root->p->right = tree_root->right;
+			delete tree_root;
+		}
+		//Left child node.
+		if(tree_root->left != NULL && tree_root->right == NULL) {
+			tree_root->left->p = tree_root->p;
+			tree_root->p->left = tree_root->left;
+			delete tree_root;
+		}
+		//Two children nodes, focusing on left subtree.
+		else {
+			//Left child has both nodes.
+			if(tree_root->left->left != NULL && tree_root->left->right != NULL) {
+				while(tree_root->left->right->right != NULL) {
+					tree_root->left->p = tree_root->left->right->right;
+					tree_root->right->p = tree_root->left->right->right;
+					tree_root->left->right->right->left = tree_root->left;
+					tree_root->left->right->right->right = tree_root->right;
+					delete_node(tree_root->left->right->right->d(), tree_root->left->right->right);
+				}
+				
+			}
+			//Left child only has right node.
+			else if(tree_root->left->left == NULL && tree_root->left->right != NULL) {
+				tree_root->left->p = tree_root->left->right;
+				tree_root->left->right->left = tree_root->left;
+				tree_root->left->right->p = tree_root->p;
+				tree_root->p->left = tree_root->left->right;
+				tree_root->right->p = tree_root->left->right;
+				tree_root->left->right->right = tree_root->right;
+				tree_root->left->right = NULL;
+				delete tree_root;
+			}
+			//Left child has no nodes or only left node.
+			else {
+				tree_root->left->p = tree_root->p;
+				tree_root->p->right = tree_root->left;
+				tree_root->left->right = tree_root->right;
+				tree_root->right->p = tree_root->left;
+				delete tree_root;
+			}
+		}	
+	}
+}
+
+void search(int value, Node *tree_root){
+	//Your code here
+	if(tree_root == NULL) {
+		cout << "Node " << value << " Can't Be Found" << endl;
+		return;
+	}
+	if(value > tree_root->d()) {
+		search(value, tree_root->right);
+	}
+	if(value < tree_root->d()) {
+		search(value, tree_root->left);
+	}
+	if(value == tree_root->d()) {
+		cout << "Node " << value << " Found" << endl;
+		tree_root->print();
+	}
+}
+
+
+int main(int argc, const char * argv[]) {
+	Node *root = new Node(2);
+	Node *node_1 = new Node(1);
+	Node *node_4 = new Node(4);
+	Node *node_5 = new Node(5);
+	Node *node_9 = new Node(9);
+	Node *node_3 = new Node(3);
+	Node *node_6 = new Node(6);
+	Node *node_7 = new Node(7);
+	Node *node_10 = new Node(10);
+	Node *node_12 = new Node(12);
+	Node *node_11 = new Node(11);
+	insert(node_1, root);
+	insert(node_4, root);
+	insert(node_5, root);
+	insert(node_9, root);
+	insert(node_3, root);
+	insert(node_6, root);
+	insert(node_7, root);
+	insert(node_10, root);
+	insert(node_12, root);
+	insert(node_11, root);
+	
+	//Part 1
+	/*root->print();
+	node_1->print();
+	node_4->print();
+	node_5->print();
+	node_9->print();
+	node_3->print();
+	node_6->print();
+	node_7->print();
+	node_10->print();
+	node_12->print();
+	node_11->print();*/
+
+	//Part 2
+	/*cout << "Before deletion of 4" << endl;
+	root->print();
+	node_4->print();
+	node_3->print();
+	node_5->print();
+	delete_node(4, root);
+	cout << "After deletion of 4" << endl;
+	root->print();
+	node_3->print();  
+	node_5->print();
+	cout << "Before deletion of 9" << endl;
+	node_9->print();
+	node_6->print();
+	node_7->print();
+	node_10->print();
+	delete_node(9, root);
+	cout << "After deletion of 9" << endl;
+	node_6->print();
+	node_7->print();
+	node_10->print();*/
+	
+	//Part 3
+	/*search(12, root);
+	search(4, root);*/
+}
